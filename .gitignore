@@ -1,0 +1,8 @@
+node_modules/
+.env
+artifacts/
+cache/
+Flattened.sol
+.DS_Store
+website/node_modules/
+website/dist/
