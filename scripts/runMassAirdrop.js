@@ -4,28 +4,27 @@ import "dotenv/config";
 
 async function main() {
   console.log("=========================================");
-  console.log("   CJP MASS AIRDROP SCRIPT INITIATED     ");
+  console.log(" CJP MASS AIRDROP SCRIPT (PREMIUM MODE)  ");
   console.log("=========================================\n");
 
   // Load targets
-  if (!fs.existsSync("targets.json")) {
-    console.error("Error: targets.json not found! Run the scraper script first.");
+  if (!fs.existsSync("premium_targets.json")) {
+    console.error("Error: premium_targets.json not found! Run the scraper script first.");
     process.exit(1);
   }
-  const targets = JSON.parse(fs.readFileSync("targets.json", "utf8"));
-  console.log(`Loaded ${targets.length} target wallets.`);
+  const targets = JSON.parse(fs.readFileSync("premium_targets.json", "utf8"));
+  console.log(`Loaded ${targets.length} premium target wallets.`);
 
   // Load progress to allow resuming
   let progress = [];
-  if (fs.existsSync("airdrop_progress.json")) {
-    progress = JSON.parse(fs.readFileSync("airdrop_progress.json", "utf8"));
-    console.log(`Found previous progress: ${progress.length} wallets already airdropped. Resuming...`);
+  if (fs.existsSync("premium_airdrop_progress.json")) {
+    progress = JSON.parse(fs.readFileSync("premium_airdrop_progress.json", "utf8"));
+    console.log(`Found previous progress: ${progress.length} premium wallets already airdropped. Resuming...`);
   }
 
   // Setup Wallet & Contract
   const provider = new ethers.JsonRpcProvider(process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/");
   
-  // MUST use the NEW airdrop wallet private key here!
   if (!process.env.AIRDROP_PRIVATE_KEY) {
     console.error("Error: Please add AIRDROP_PRIVATE_KEY to your .env file!");
     process.exit(1);
@@ -63,7 +62,7 @@ async function main() {
 
       // Record success
       progress.push(targetAddress);
-      fs.writeFileSync("airdrop_progress.json", JSON.stringify(progress, null, 2));
+      fs.writeFileSync("premium_airdrop_progress.json", JSON.stringify(progress, null, 2));
 
       currentNonce++;
 
@@ -79,7 +78,7 @@ async function main() {
   }
 
   console.log("\n=========================================");
-  console.log("   AIRDROP COMPLETELY FINISHED! 🚀       ");
+  console.log("   PREMIUM AIRDROP COMPLETELY FINISHED! 🚀  ");
   console.log("=========================================");
 }
 
