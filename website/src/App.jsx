@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import QuizPage from './components/QuizPage'
 import './index.css'
 
-function App() {
+function HomePage() {
   const [copied, setCopied] = useState(false);
   const contractAddress = "0xA9B4a901400e959CF51a89Ed928e5aDb151bD395";
   const pancakeSwapLink = `https://pancakeswap.finance/swap?outputCurrency=${contractAddress}`;
@@ -14,20 +16,6 @@ function App() {
 
   return (
     <>
-      {/* Navigation */}
-      <nav style={{ padding: '20px 0', borderBottom: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontWeight: '900', fontSize: '1.5rem', color: 'var(--primary-color)' }}>
-            CJP <span style={{ color: 'var(--text-color)' }}>COIN</span>
-          </div>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <a href="#about">About</a>
-            <a href="#tokenomics">Tokenomics</a>
-            <a href={pancakeSwapLink} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary-color)', fontWeight: 'bold' }}>Buy Now</a>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <header className="container" style={{ padding: '80px 20px', textAlign: 'center', minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
         <img 
@@ -60,9 +48,9 @@ function App() {
           <a href={pancakeSwapLink} target="_blank" rel="noreferrer" className="btn btn-primary">
             Buy on PancakeSwap
           </a>
-          <a href="#tokenomics" className="btn btn-secondary">
-            View Tokenomics
-          </a>
+          <Link to="/rewards" className="btn btn-secondary bg-cjp-green text-black border-none hover:scale-105 transition-transform font-bold">
+            🎁 Daily 10k Airdrop
+          </Link>
         </div>
       </header>
 
@@ -135,8 +123,38 @@ function App() {
           </div>
         </div>
       </section>
+    </>
+  );
+}
 
-      {/* Footer */}
+function App() {
+  const contractAddress = "0xA9B4a901400e959CF51a89Ed928e5aDb151bD395";
+  const pancakeSwapLink = `https://pancakeswap.finance/swap?outputCurrency=${contractAddress}`;
+
+  return (
+    <Router>
+      {/* Global Navigation */}
+      <nav style={{ padding: '20px 0', borderBottom: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link to="/" style={{ fontWeight: '900', fontSize: '1.5rem', color: 'var(--primary-color)', textDecoration: 'none' }}>
+            CJP <span style={{ color: 'var(--text-color)' }}>COIN</span>
+          </Link>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <Link to="/rewards" style={{ color: 'var(--cjp-green)', fontWeight: 'bold', textDecoration: 'none' }}>🎁 Daily Airdrop</Link>
+            <a href="/#about" style={{textDecoration: 'none', color: 'white'}}>About</a>
+            <a href="/#tokenomics" style={{textDecoration: 'none', color: 'white'}}>Tokenomics</a>
+            <a href={pancakeSwapLink} target="_blank" rel="noreferrer" style={{ color: 'var(--secondary-color)', fontWeight: 'bold', textDecoration: 'none' }}>Buy Now</a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/rewards" element={<QuizPage />} />
+      </Routes>
+
+      {/* Global Footer */}
       <footer style={{ background: 'var(--bg-color-light)', padding: '40px 20px', textAlign: 'center', marginTop: '60px', borderTop: '1px solid var(--glass-border)' }}>
         <div className="container">
           <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>Join the Party</h2>
@@ -153,7 +171,7 @@ function App() {
           </p>
         </div>
       </footer>
-    </>
+    </Router>
   )
 }
 
