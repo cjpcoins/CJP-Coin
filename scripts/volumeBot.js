@@ -3,10 +3,10 @@ import fs from "fs";
 import "dotenv/config";
 
 // --- SMART COST-SAVING CONFIGURATION ---
-const NUM_BOTS = 3; // How many burner wallets to use
-const FUND_AMOUNT_BNB = "0.02"; // Amount of BNB to send to each bot initially (~$12)
-const MIN_SLEEP_MINUTES = 10; // Minimum wait time between trades (keeps gas costs low)
-const MAX_SLEEP_MINUTES = 30; // Maximum wait time between trades
+const NUM_BOTS = 10; // Testing with 10 bots to stretch the remaining BNB
+const FUND_AMOUNT_BNB = "0.0003"; // Amount of BNB to send to bot (~$0.18)
+const MIN_SLEEP_MINUTES = 5; // Human-like trading frequency
+const MAX_SLEEP_MINUTES = 15;
 
 const PANCAKESWAP_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
@@ -38,11 +38,11 @@ async function main() {
 
   const provider = new ethers.JsonRpcProvider(process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org/");
   
-  if (!process.env.PRIVATE_KEY) {
-    console.error("Error: Master PRIVATE_KEY missing from .env!");
+  if (!process.env.VOLUME_BOT_PRIVATE_KEY) {
+    console.error("Error: VOLUME_BOT_PRIVATE_KEY missing from .env!");
     process.exit(1);
   }
-  const masterWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  const masterWallet = new ethers.Wallet(process.env.VOLUME_BOT_PRIVATE_KEY, provider);
   console.log(`Master Wallet: ${masterWallet.address}`);
   const masterBal = await provider.getBalance(masterWallet.address);
   console.log(`Master Balance: ${ethers.formatEther(masterBal)} BNB\n`);
@@ -51,6 +51,7 @@ async function main() {
   let botKeys = [];
   if (fs.existsSync("bot_wallets.json")) {
     botKeys = JSON.parse(fs.readFileSync("bot_wallets.json", "utf8"));
+    botKeys = botKeys.slice(0, NUM_BOTS); // Limit to current config
     console.log(`Loaded ${botKeys.length} existing bot wallets.`);
   } else {
     console.log(`Generating ${NUM_BOTS} new burner wallets...`);
@@ -68,7 +69,7 @@ async function main() {
   const fundAmount = ethers.parseEther(FUND_AMOUNT_BNB);
   for (let i = 0; i < bots.length; i++) {
     const bal = await provider.getBalance(bots[i].address);
-    if (bal < ethers.parseEther("0.005")) { // If less than 0.005 BNB, it needs funding
+    if (bal < ethers.parseEther("0.0002")) { // If less than 0.0002 BNB, it needs funding
       console.log(`Funding Bot ${i + 1} (${bots[i].address}) with ${FUND_AMOUNT_BNB} BNB...`);
       try {
         const tx = await masterWallet.sendTransaction({
@@ -104,12 +105,12 @@ async function main() {
       
       // Decide Buy or Sell based on balances
       let action = "BUY";
-      if (cjpBal > 0n && bnbBal > ethers.parseEther("0.005")) {
+      if (cjpBal > 0n && bnbBal > ethers.parseEther("0.00015")) {
         // 50/50 chance if it has both
         action = Math.random() > 0.5 ? "BUY" : "SELL";
       } else if (cjpBal > 0n) {
         action = "SELL"; // Low on BNB, must sell tokens
-      } else if (bnbBal < ethers.parseEther("0.005")) {
+      } else if (bnbBal < ethers.parseEther("0.00015")) {
         console.log("   -> Bot is completely out of funds. Skipping.");
         action = "SKIP";
       }
@@ -117,8 +118,8 @@ async function main() {
       if (action === "BUY") {
         // Buy with 10% to 30% of its BNB balance to keep it random
         const percentToSpend = getRandomInt(10, 30) / 100;
-        // Keep a gas buffer
-        const availableBnb = bnbBal - ethers.parseEther("0.003"); 
+        // Keep a micro gas buffer
+        const availableBnb = bnbBal - ethers.parseEther("0.00015"); 
         
         if (availableBnb > 0n) {
           const amountIn = (availableBnb * BigInt(Math.floor(percentToSpend * 100))) / 100n;
